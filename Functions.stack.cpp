@@ -7,7 +7,7 @@
 #define Under  "\033[4m"
 
 const int Two_canarys = 2;
-const int One_canary = 1;
+const int One_canary  = 1;
 
 
 void StackCtor(stack* st){
@@ -111,15 +111,15 @@ void StackResize(stack* st, int Push_or_Pop){
 void StackRecalloc (int Push_or_POP, stack* st, int new_size){
 
     _StackCheck(st);
-    st -> capacity             = new_size;
+    st -> capacity           = new_size;
     st -> hash_stk           = hash_stack(st);
 
     st -> data = (Data*)realloc(st -> data_ptr, sizeof(Data) * (st -> capacity + Two_canarys));
 
-    st -> data_ptr           = st -> data;
+    st -> data_ptr = st -> data;
     st -> data ++;
 
-    st -> data[st -> capacity]     = Canary_Value;
+    st -> data[st -> capacity] = Canary_Value;
 }
 
 
@@ -265,7 +265,7 @@ Data hash_data(stack* st) {
 }
 
 int is_equal(Data value1, Data value2) {
-    
+
     return (fabs(value1 - value2) < Epsilon);
 }
 
