@@ -125,30 +125,34 @@ void StackRecalloc (int Push_or_POP, stack* st, int new_size){
 
 void StackCheck(stack* st, int line, const char* func, const char* file){ // StackVerificate()
 
-
+    printf("st->size = %d\n", st->size);
     int err_code = 0;
 
-    if (st -> data[st -> capacity] != Canary_Value) { err_code += DATA_CANARY_TWO_ERR; }
+    if (!(st -> data)) { 
+        err_code += STACK_IS_NULLPTR; 
+    } 
+    else {
+        if (st -> data[st -> capacity] != Canary_Value) { err_code += DATA_CANARY_TWO_ERR; }
 
-    if (st -> data[-1] != Canary_Value)             { err_code += DATA_CANARY_ONE_ERR;}
+        if (st -> data[-1] != Canary_Value)             { err_code += DATA_CANARY_ONE_ERR;}
 
-    if (st -> canary_1 != Canary_Value)             { err_code += STACK_CANARY_ONE_ERR; }
+        if (st -> canary_1 != Canary_Value)             { err_code += STACK_CANARY_ONE_ERR; }
 
-    if (st -> canary_2 != Canary_Value)             { err_code += STACK_CANARY_TWO_ERR; }
+        if (st -> canary_2 != Canary_Value)             { err_code += STACK_CANARY_TWO_ERR; }
 
-    if (st -> size > st -> capacity)                { err_code += INVALID_CAPACITY; }
+        if (st -> size < 0)                             { err_code += INVALID_SIZE; }
 
-    if (!is_equal(st -> hash_data, hash_data(st)))  { err_code += HASH_DATA_ERROR; }
+        else {
+            if   (st -> size > st -> capacity)                  { err_code += INVALID_CAPACITY; }
+            else {
+                if (IsDataValid(st) == ElemIsPoison)            { err_code += ElemOfStackIsPoison; }
+                if (!is_equal(st -> hash_data, hash_data(st)))  { err_code += HASH_DATA_ERROR; }
+                if (st -> hash_stk != hash_stack(st))           { err_code += HASH_STACK_ERROR; } 
+            }
+        }
 
-    if (st -> hash_stk != hash_stack(st))           { err_code += HASH_STACK_ERROR; } 
-
-    if (IsDataValid(st) == ElemIsPoison)            { err_code += ElemOfStackIsPoison; }
-
-    if (st -> size < 0)                             { err_code += INVALID_SIZE; }
-
-    if (err_code)                                   { st -> stack_is_damaged = 1; }
-
-    if (!st)                                        { err_code += STACK_IS_NULLPTR; }
+        if (err_code)                                   { st -> stack_is_damaged = 1; }
+    }
 
     PrintError(st, err_code, line, func, file);
 }
@@ -159,12 +163,13 @@ void PrintError (stack* st, int ErrCode, int line, const char* func, const char*
 
     if (ErrCode & INVALID_CAPACITY) { 
         fprintf(stderr, ""White"%s:%d:"Grey"In function "White"'%s':"Grey"\n", __FILE__, line, func);
-        fprintf(stderr, ""White"%s:%d:"Red" error: "Grey"Size of the Stack > capacity. Size of stack must be '<= capacity' (check log.txt for more information)\n", __FILE__, line);
+        fprintf(stderr, ""White"%s:%d:"Red" error: "Grey"Size of the Stack > capacity. Size of stack must be '<= capacity' (check log.txt for more information)\n\t|\t"Blue"'st -> size = %d > st ->capacity = %d'"Grey"\n\t|"
+        "\n", __FILE__, line, st -> size, st ->capacity);
         number_of_errors ++;
     }
     if (ErrCode & INVALID_SIZE) {
         fprintf(stderr, ""White"%s:%d:"Grey"In function "White"'%s':"Grey"\n", __FILE__, line, func);
-        fprintf(stderr, ""White"%s:%d:"Red" error: "Grey"Invalid size of stack. Size of stack must be '> 0' (check log.txt for more information)\n", __FILE__, line);
+        fprintf(stderr, ""White"%s:%d:"Red" error: "Grey"Invalid size of stack. Size of stack must be '> 0' (check log.txt for more information)\n\t|\t"Blue"'st -> size = %d < 0'"Grey"\n\t|\n", __FILE__, line, st -> size);
         number_of_errors ++;
     }
     if (ErrCode & ElemOfStackIsPoison) {
@@ -174,7 +179,7 @@ void PrintError (stack* st, int ErrCode, int line, const char* func, const char*
     }
     if (ErrCode & STACK_IS_NULLPTR) {
         fprintf(stderr, ""White"%s:%d:"Grey"In function "White"'%s':"Grey"\n", __FILE__, line, func);
-        fprintf(stderr, ""White"%s:%d:"Red" error: "Grey"Stack is nullptr(check log.txt for more information)\n", __FILE__, line);
+        fprintf(stderr, ""White"%s:%d:"Red" error: "Grey"Stack is nullptr(check log.txt for more information)\n\t|\t"Blue"'st = %s'"Grey"\n\t|\n", __FILE__, line, st -> data);
         number_of_errors ++;
     }
     if (ErrCode & DATA_CANARY_ONE_ERR) { 
@@ -199,7 +204,7 @@ void PrintError (stack* st, int ErrCode, int line, const char* func, const char*
     }
     if (ErrCode & HASH_STACK_ERROR) {
         fprintf(stderr, ""White"%s:%d:"Grey"In function "White"'%s':"Grey"\n", __FILE__, line, func);
-        fprintf(stderr, ""White"%s:%d:"Red" error: "Grey"Hash of stack was damaged(check log.txt for more information)\n\t|\t"Blue"'hash_stk = %lg != %lg'"Grey"\n\t|\n", __FILE__, line, st -> hash_stk, hash_stack(st));
+        fprintf(stderr, ""White"%s:%d:"Red" error: "Grey"Hash of stack was damaged(check log.txt for more information)\n\t|\t"Blue"'hash_stk = %zd != %zd'"Grey"\n\t|\n", __FILE__, line, st -> hash_stk, hash_stack(st));
         number_of_errors ++;
     }
     if (ErrCode & HASH_DATA_ERROR) {
@@ -237,17 +242,17 @@ void DoPoison(stack*st){
 
     int difference = st->capacity - st->size;
 
-    for (int i = 0; i < difference; i++) {
-        st->data[st->size + i] = POISON;
+    for (int stack_number = 0; stack_number < difference; stack_number++) {
+        st->data[st->size + stack_number] = POISON;
     }
 }
 
 int IsDataValid(stack* st){  // IsDataValid
 
-    size_t i;
+    int stack_number = 0;
 
-    for (i = 0; i < st->size; i++){
-        if (st->data[i] == POISON){
+    for ( ; stack_number < st->size; stack_number++){
+        if (st->data[stack_number] == POISON){
             return ElemIsPoison;
         }
     }
@@ -257,7 +262,7 @@ int IsDataValid(stack* st){  // IsDataValid
 Data hash_data(stack* st) {
 
     Data stk_summa = 0;
-    for (size_t st_number = 0; st_number < st -> size; st_number++) {
+    for (int st_number = 0; st_number < st -> size; st_number++) {
         stk_summa += st -> data[st_number];
     }
 
@@ -269,7 +274,7 @@ int is_equal(Data value1, Data value2) {
     return (fabs(value1 - value2) < Epsilon);
 }
 
-size_t hash_stack(stack* st) {
+int hash_stack(stack* st) {
 
     return (st -> size + st -> capacity);
 }
@@ -284,23 +289,23 @@ void StackDump (stack* st, int line, const char func[], const char* stack_name)
 
     fprintf(log_txt, "StackDump was called from '%d' line and function: '%s'\n", line, func);
     fprintf(log_txt, "Stack name: %s\n",                          stack_name);
-    fprintf(log_txt, "\t\tElements in stack(st.size):   %zd\n",     st->size);
-    fprintf(log_txt, "\t\tStack capacity:               %zd\n", st->capacity); 
+    fprintf(log_txt, "\t\tElements in stack(st.size):   %d\n",     st->size);
+    fprintf(log_txt, "\t\tStack capacity:               %d\n", st->capacity); 
     fprintf(log_txt, "\t\tStack pointer(data):          %X\n",      st->data);
     fprintf(log_txt, "\t\tStack is damaged?:           <%s>\n", st -> stack_is_damaged == 1 ? "YES":"NO");
     fprintf(log_txt, "%s\n", st->capacity == 0 ? "Stack is empty":"Elements in stack:");
 
     fprintf(log_txt, " [%d] = %lg Canary_1\n", -1, st ->data[-1]);
-    for (size_t i = 0; i < st->capacity; i++){
+    for (int stack_number = 0; stack_number < st->capacity; stack_number++){
 
-        if (st->data[i] != POISON){
-            fprintf(log_txt, "*[%zd] = %lg\n", i, st->data[i]);
+        if (st->data[stack_number] != POISON){
+            fprintf(log_txt, "*[%d] = %lg\n", stack_number, st->data[stack_number]);
         }
         else {
-            fprintf(log_txt, " [%zd] = %lg POISON\n", i, st->data[i]);
+            fprintf(log_txt, " [%d] = %lg POISON\n", stack_number, st->data[stack_number]);
         }
     }
-    fprintf(log_txt, " [%zd] = %lg Canary_2\n", st ->capacity, st ->data[st -> capacity]);
+    fprintf(log_txt, " [%d] = %lg Canary_2\n", st ->capacity, st ->data[st -> capacity]);
     fprintf(log_txt, "************************************************************************************\n\n");
 
     fclose(log_txt);

@@ -5,7 +5,7 @@ int main(){
     stack st;
 
     Data arr[100];
-    const int size = 50;
+    const int size = 100;
     
     StackCtor(&st);
 
@@ -22,7 +22,10 @@ int main(){
     StackPush(&st, 54.23);
     StackPush(&st, 54.543);
     
-    // st.hash_data = 523;
+    // st.hash_data = 32;
+    // st.hash_stk  = -354.5243;
+    // st.canary_1  = -5235.52;
+    // st.canary_2  = -325235.523;
 
     _StackDump(&st);
 

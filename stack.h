@@ -24,9 +24,9 @@ typedef struct{
     Data canary_1 ;
     Data* data    ;
     Data* data_ptr;  
-    size_t size   ;         // сколько реально лежит элементов в стеке
-    size_t capacity;        // Сколько может вместить участок памяти, который я выделил для стека
-    size_t hash_stk;        // st.size + st.capacity
+    int size   ;         // сколько реально лежит элементов в стеке
+    int capacity;        // Сколько может вместить участок памяти, который я выделил для стека
+    int hash_stk;        // st.size + st.capacity
     Data   hash_data;      // Сумма элементов в стеке
     char stack_is_damaged;
     Data canary_2;
@@ -88,8 +88,9 @@ void PrintError (stack* st, int ErrCode, int line, const char* func, const char*
 
 int is_equal(Data value1, Data value2);
 
+int hash_stack(stack* st);
+
 Data hash_data(stack* st);
 
-size_t hash_stack(stack* st);
 
 #endif
