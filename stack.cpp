@@ -1,4 +1,6 @@
 #include "stack.h"
+#include <stdarg.h>
+
 
 int main(){
 
@@ -25,14 +27,11 @@ int main(){
     // st.hash_data = 32;
     // st.hash_stk  = -354.5243;
     // st.canary_1  = -5235.52;
-    // st.canary_2  = -325235.523;
-
     _StackDump(&st);
 
 
     StackDtor(&st);
 
-    // _StackDump(&st);
 
 
     return 0;

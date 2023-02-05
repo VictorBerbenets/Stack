@@ -34,6 +34,7 @@ typedef struct{
 } stack;
 
 
+
 enum{
     ElemIsPoison    = 234567,
     NoPoison        = 345678,
@@ -91,6 +92,5 @@ int is_equal(Data value1, Data value2);
 int hash_stack(stack* st);
 
 Data hash_data(stack* st);
-
 
 #endif
