@@ -1,0 +1,8 @@
+Functions.stack.cpp:150: In function 'StackRecalloc':
+Functions.stack.cpp:150: error:STACK_ASSERT expression is false
+	|	check_memory_give != nullptr
+	|
+Functions.stack.cpp:154: In function 'StackRecalloc':
+Functions.stack.cpp:154: error:STACK_ASSERT expression is false
+	|	check_memory_give != nullptr
+	|
