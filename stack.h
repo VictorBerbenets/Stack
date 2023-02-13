@@ -19,21 +19,16 @@ typedef double Data;
 
 const Data Epsilon = 1e-17;
 
-// #define STACK_HASH
-// #define STACK_CANARY
-// #define STACK_HASH_DATA
-// #define STACK_DATA_CANARY_PROTECT
-
 typedef struct {
 
 #ifdef STACK_CANARY
     Data canary_left;
 #endif
     Data* data;
+    Data hash_data;      // Сумма элементов в стеке
     int size  ;         // сколько реально лежит элементов в стеке
     int capacity;        // Сколько может вместить участок памяти, который я выделил для стека
-    int  hash_stk;        // st.size + st.capacity
-    Data hash_data;      // Сумма элементов в стеке
+    Data  hash_stk;        // st.size + st.capacity
     char stack_is_damaged;
 
 #ifdef STACK_CANARY
@@ -98,7 +93,7 @@ void PrintError (stack* st, int ErrCode, int line, const char* func, const char*
 
 int is_equal(Data value1, Data value2);
 
-int hash_stack(stack* st);
+Data hash_stack(stack* st);
 
 Data hash_data(stack* st);
 

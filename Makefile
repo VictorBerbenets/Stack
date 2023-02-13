@@ -2,7 +2,7 @@
 
 CC = g++
 
-CFLAGS =-c -Wall 
+CFLAGS = -c -Wall -Wextra
 
 all : MyStack
 
@@ -16,4 +16,6 @@ Functions.stack.o : Functions.stack.cpp
 	$(CC) $(CFLAGS) $^
 
 clean:
-	rm -rf * .o MyStack
+	rm -rf *.o MyStack
+
+rebuild: clean all

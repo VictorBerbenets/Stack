@@ -5,6 +5,13 @@ const double Canary_Value = -0XDEDFEED69;
 const double Canary_left  =  0xDEADBEEF1;
 const double Canary_right =  0xDEADBEEF9;
 
+#ifdef FULL_STACK_DEFENSE
+#define STACK_HASH
+#define STACK_CANARY
+#define STACK_HASH_DATA
+#define STACK_DATA_CANARY_PROTECT
+#endif
+
 enum canary_errors {
 
     STACK_CANARY_LEFT    = (1 << 5),

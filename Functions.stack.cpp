@@ -73,8 +73,6 @@ void StackPush(stack* st, Data value){
             DoPoison(st);
         }
     }
-    
-// fprintf(stderr, "line = %d\n", __LINE__);
 #ifdef STACK_DATA_CANARY_PROTECT
     st -> size ++;
     st -> data[st -> size] = value;
@@ -82,20 +80,14 @@ void StackPush(stack* st, Data value){
     st -> data[st -> size] = value;
     st -> size ++;
 #endif
-// fprintf(stderr, "line = %d\n", __LINE__);
-
 
 #ifdef STACK_HASH_DATA
     st -> hash_data = hash_data(st);
 #endif
 #ifdef STACK_HASH
-    // st -> hash_stk  = 0;
+    st -> hash_stk  = 0;
     st -> hash_stk  = hash_stack(st);
 #endif
-
-    // tmp = 
-    // tmp = hash_stack(st);
-
 
     _StackCheck(st);
 }
@@ -110,7 +102,6 @@ Data StackPop (stack* st){
         if ((st->capacity - st->size) > MaxStayedSize){
             StackResize(st, POP);
         }
-
         if (IsStackEmpty(st) == StackNotEmpty){
             st -> size --;
 
@@ -118,17 +109,15 @@ Data StackPop (stack* st){
             st -> hash_data = hash_data(st);
 #endif
 #ifdef  STACK_HASH
+            st -> hash_stk  = 0;
             st -> hash_stk  = hash_stack(st);
 #endif
-
         if (st -> size != 0 && st -> data) {
             DoPoison(st);
         }
-            
             return res;
         }
     }
-
     return StackIsEmpty;   
 }
 
@@ -152,8 +141,8 @@ void StackResize(stack* st, int Push_or_Pop){
 void StackRecalloc (int Push_or_POP, stack* st, int new_size){
 
     _StackCheck(st);
+
     st -> capacity           = new_size;
-    st -> hash_stk           = hash_stack(st);
     Data* check_memory_give  = nullptr;
 
 #ifdef STACK_DATA_CANARY_PROTECT
@@ -171,9 +160,12 @@ void StackRecalloc (int Push_or_POP, stack* st, int new_size){
     "nullptr.\n", __FILE__, __LINE__, __FUNCTION__); return ;);
 
     st -> data   = check_memory_give;
-    printf("BOOL = %d\n", st -> data == nullptr);
 #endif
 
+#ifdef STACK_HASH
+    st -> hash_stk  = 0;
+    st -> hash_stk  = hash_stack(st);
+#endif
 }
 
 
@@ -206,7 +198,7 @@ if(st -> size != 0 || st -> capacity != 0) {
                 if (!is_equal(st -> hash_data, hash_data(st)))  { err_code += HASH_DATA_ERROR; }
 #endif                                                                          
 #ifdef STACK_HASH
-                if (st -> hash_stk != hash_stack(st))           { err_code += HASH_STACK_ERROR; } 
+                if (!is_equal(st -> hash_stk, hash_stack(st)))  { err_code += HASH_STACK_ERROR; } 
 #endif
             }
         }
@@ -279,7 +271,7 @@ void PrintError (stack* st, int ErrCode, int line, const char* func, const char*
     if (ErrCode & HASH_STACK_ERROR) {
         fprintf(stderr, "" White "%s:%d:" Grey "In function " White "'%s':" Grey "\n", file, line, func);
         fprintf(stderr, "" White "%s:%d:" Red " error: " Grey "Hash of stack was damaged(check log.txt for more information)\n\t|\t" Blue ""
-        "'hash_stk = %d != %d'" Grey "\n\t|\n", file, line, st -> hash_stk, hash_stack(st));
+        "'hash_stk = %lg != %lg'" Grey "\n\t|\n", file, line, st -> hash_stk, hash_stack(st));
         number_of_errors ++;
     }
 #endif
@@ -292,15 +284,12 @@ void PrintError (stack* st, int ErrCode, int line, const char* func, const char*
     }
 #endif
     if (ErrCode) {
+
         if(!(ErrCode & STACK_IS_NULLPTR)) {
             _StackDump(st);
         }
-    fprintf(stderr, "line = %d\n", __LINE__);
-
         StackDtor(st);
         exit(EXIT_FAILURE);
-    fprintf(stderr, "line = %d\n", __LINE__);
-
     }
 }
 
@@ -354,7 +343,7 @@ int IsDataValid(stack* st){
 
 Data hash_data(stack* st) {
 
-    size_t mult  = 97;
+    Data mult    = 0.5;
     Data hash    = 0;
 
     for (int st_number = 1; st_number <= st -> size; st_number++) {
@@ -362,7 +351,6 @@ Data hash_data(stack* st) {
         hash *= mult;
         hash += st -> data[st_number];
     }
-
     return hash;
 }
 
@@ -371,9 +359,22 @@ int is_equal(Data value1, Data value2) {
     return (fabs(value1 - value2) < Epsilon);
 }
 
-int hash_stack(stack* st) {
+Data hash_stack(stack* st) {
 
-    return (st -> size + st -> capacity);
+    size_t mult      = 0.5;
+    Data hash_stack  = 0;
+    Data stack_hash  = st -> hash_stk;
+    st -> hash_stk   = 0;
+    char* hash_ptr   = (char*)st;
+
+    for (size_t counter = 0; counter < sizeof(*st); counter++, hash_ptr++) {
+
+        hash_stack *= mult;
+        hash_stack += *hash_ptr;
+        
+    }
+    st -> hash_stk = stack_hash;
+    return hash_stack / (hash_stack + 1);
 }
 
 /*Вывод общей информации*/
@@ -387,8 +388,8 @@ void StackDump (stack* st, int line, const char func[], const char* stack_name)
     fprintf(log_txt, "Stack name: %s\n",                          stack_name);
     fprintf(log_txt, "\t\tElements in stack(st.size):   %d\n",     st->size);
 #ifdef STACK_CANARY
-    fprintf(log_txt, "\t\tStack Canary left  = %lg        \n",     st->canary_left);
-    fprintf(log_txt, "\t\tStack Canary right = %lg        \n",     st->canary_right);
+    fprintf(log_txt, "\t\tStack Canary left            = %lg        \n",     st->canary_left);
+    fprintf(log_txt, "\t\tStack Canary right           = %lg        \n",     st->canary_right);
 #endif
     fprintf(log_txt, "\t\tStack capacity:               %d\n", st->capacity); 
     fprintf(log_txt, "\t\tStack pointer(data):          %p\n", st->data);
@@ -417,8 +418,6 @@ void StackDump (stack* st, int line, const char func[], const char* stack_name)
     fprintf(log_txt, " [%d] = %lg Data Canary_right\n", st ->capacity + 1, st ->data[st -> capacity + 1]);
 #endif
     }
-
     fprintf(log_txt, "************************************************************************************\n\n");
-
     fclose(log_txt);
 }
