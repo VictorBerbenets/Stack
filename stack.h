@@ -25,10 +25,14 @@ typedef struct {
     Data canary_left;
 #endif
     Data* data;
+#ifdef STACK_HASH_DATA
     Data hash_data;      // Сумма элементов в стеке
+#endif
     int size  ;         // сколько реально лежит элементов в стеке
     int capacity;        // Сколько может вместить участок памяти, который я выделил для стека
+#ifdef STACK_HASH
     Data  hash_stk;        // st.size + st.capacity
+#endif
     char stack_is_damaged;
 
 #ifdef STACK_CANARY

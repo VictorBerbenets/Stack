@@ -53,8 +53,12 @@ void StackDtor(stack* st){
 
     st -> data             = nullptr;
     st -> size             = 0;
+#ifdef STACK_HASH_DATA
     st -> hash_data        = 0;
+#endif
+#ifdef STACK_HASH
     st -> hash_stk         = 0;
+#endif
     st -> stack_is_damaged = 0;
     st -> capacity         = 0;
 #ifdef STACK_CANARY
@@ -359,12 +363,16 @@ int is_equal(Data value1, Data value2) {
     return (fabs(value1 - value2) < Epsilon);
 }
 
+#ifdef STACK_HASH
 Data hash_stack(stack* st) {
+
 
     size_t mult      = 0.5;
     Data hash_stack  = 0;
+
     Data stack_hash  = st -> hash_stk;
     st -> hash_stk   = 0;
+
     char* hash_ptr   = (char*)st;
 
     for (size_t counter = 0; counter < sizeof(*st); counter++, hash_ptr++) {
@@ -376,6 +384,7 @@ Data hash_stack(stack* st) {
     st -> hash_stk = stack_hash;
     return hash_stack / (hash_stack + 1);
 }
+#endif
 
 /*Вывод общей информации*/
 void StackDump (stack* st, int line, const char func[], const char* stack_name)
