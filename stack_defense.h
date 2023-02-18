@@ -1,9 +1,11 @@
 #ifndef Stack_defense
 #define Stack_defense
 
-const double Canary_Value = -0XDEDFEED69;
-const double Canary_left  =  0xDEADBEEF1;
-const double Canary_right =  0xDEADBEEF9;
+typedef unsigned long long Ull;
+
+const Ull Canary_Value =  0XDEDFEED69;
+const Ull Canary_left  =  0xDEADBEEF1;
+const Ull Canary_right =  0xDEADBEEF9;
 
 #ifdef FULL_STACK_DEFENSE
 #define STACK_HASH

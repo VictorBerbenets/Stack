@@ -9,10 +9,10 @@
 #include <malloc.h>
 #include <math.h>
 
-#include "stack_defense.h"
 
 typedef double Data;
 
+#include "stack_defense.h"
 
 #define _StackDump(st) StackDump(st, __LINE__, __PRETTY_FUNCTION__, #st)
 #define _StackCheck(st) StackCheck(st, __LINE__, __PRETTY_FUNCTION__, __FILE__)
@@ -22,21 +22,21 @@ const Data Epsilon = 1e-17;
 typedef struct {
 
 #ifdef STACK_CANARY
-    Data canary_left;
+    Ull canary_left;
 #endif
     Data* data;
 #ifdef STACK_HASH_DATA
-    Data hash_data;      // Сумма элементов в стеке
+    Ull hash_data;      // Сумма элементов в стеке
 #endif
     int size  ;         // сколько реально лежит элементов в стеке
     int capacity;        // Сколько может вместить участок памяти, который я выделил для стека
 #ifdef STACK_HASH
-    Data  hash_stk;        // st.size + st.capacity
+    Ull  hash_stk;        // st.size + st.capacity
 #endif
     char stack_is_damaged;
 
 #ifdef STACK_CANARY
-    Data canary_right;
+    Ull canary_right;
 #endif
 
 } stack;
@@ -97,8 +97,8 @@ void PrintError (stack* st, int ErrCode, int line, const char* func, const char*
 
 int is_equal(Data value1, Data value2);
 
-Data hash_stack(stack* st);
+Ull hash_stack(stack* st);
 
-Data hash_data(stack* st);
+Ull hash_data(stack* st);
 
 #endif

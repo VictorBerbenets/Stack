@@ -103,7 +103,7 @@ Data StackPop (stack* st){
 
         Data res = st -> data[(st -> size)];
 
-        if ((st->capacity - st->size) > MaxStayedSize){
+        if ((st->capacity - st->size) > (int)MaxStayedSize){
             StackResize(st, POP);
         }
         if (IsStackEmpty(st) == StackNotEmpty){
@@ -247,13 +247,13 @@ void PrintError (stack* st, int ErrCode, int line, const char* func, const char*
     if (ErrCode & DATA_CANARY_LEFT) { 
         fprintf(stderr, "" White "%s:%d:" Grey "In function " White "'%s':" Grey "\n", file, line, func);
         fprintf(stderr, "" White "%s:%d:" Red " error: " Grey "Canary left was damaged(check log.txt for more information)\n\t|\t" Blue ""
-        "'st[%d] = %lg != %lg'" Grey "\n\t|\n", file, line, -1, st->data[0], Canary_Value);
+        "'st[%d] = %lg != %lld'" Grey "\n\t|\n", file, line, -1, st->data[0], Canary_Value);
         number_of_errors ++;
     }
     if (ErrCode & DATA_CANARY_RIGHT) { 
         fprintf(stderr, "" White "%s:%d:" Grey "In function " White "'%s':" Grey "\n", file, line, func);
         fprintf(stderr, "" White "%s:%d:" Red " error: " Grey "Canary right was damaged(check log.txt for more information)\n\t|\t" Blue ""
-        "'st[%d] = %lg != %lg'" Grey "\n\t|\n", file, line, st -> capacity, st->data[st -> capacity + 1], Canary_Value);
+        "'st[%d] = %lg != %lld'" Grey "\n\t|\n", file, line, st -> capacity, st->data[st -> capacity + 1], Canary_Value);
         number_of_errors ++;
     }
 #endif
@@ -261,13 +261,13 @@ void PrintError (stack* st, int ErrCode, int line, const char* func, const char*
     if (ErrCode & STACK_CANARY_LEFT) { 
         fprintf(stderr, "" White "%s:%d:" Grey "In function " White "'%s':" Grey "\n",file, line, func);
         fprintf(stderr, "" White "%s:%d:" Red " error: " Grey "Stack canary 1 was damaged(check log.txt for more information)\n\t|\t" Blue ""
-        "'st->canary_2 = %lg != %lg'" Grey "\n\t|\n",file, line, st->canary_left, Canary_Value);
+        "'st->canary_2 = %lld != %lld'" Grey "\n\t|\n",file, line, st->canary_left, Canary_Value);
         number_of_errors ++;
     }
     if (ErrCode & STACK_CANARY_RIGHT) { 
         fprintf(stderr, "" White "%s:%d:" Grey "In function " White "'%s':" Grey "\n", file, line, func);
         fprintf(stderr, "" White "%s:%d:" Red " error: " Grey "Stack canary 2 was damaged(check log.txt for more information)\n\t|\t" Blue ""
-        "'st->canary_2 = %lg != %lg'" Grey "\n\t|\n", file, line, st->canary_right, Canary_Value);
+        "'st->canary_2 = %lld != %lld'" Grey "\n\t|\n", file, line, st->canary_right, Canary_Value);
         number_of_errors ++;
     }
 #endif
@@ -275,7 +275,7 @@ void PrintError (stack* st, int ErrCode, int line, const char* func, const char*
     if (ErrCode & HASH_STACK_ERROR) {
         fprintf(stderr, "" White "%s:%d:" Grey "In function " White "'%s':" Grey "\n", file, line, func);
         fprintf(stderr, "" White "%s:%d:" Red " error: " Grey "Hash of stack was damaged(check log.txt for more information)\n\t|\t" Blue ""
-        "'hash_stk = %lg != %lg'" Grey "\n\t|\n", file, line, st -> hash_stk, hash_stack(st));
+        "'hash_stk = %lld != %lld'" Grey "\n\t|\n", file, line, st -> hash_stk, hash_stack(st));
         number_of_errors ++;
     }
 #endif
@@ -283,7 +283,7 @@ void PrintError (stack* st, int ErrCode, int line, const char* func, const char*
     if (ErrCode & HASH_DATA_ERROR) {
         fprintf(stderr, "" White "%s:%d:" Grey "In function " White "'%s':" Grey "\n", file, line, func);
         fprintf(stderr, "" White "%s:%d:" Red " error: " Grey "Hash of data was damaged(check log.txt for more information)\n\t|\t" Blue ""
-        "'hash_data = %lg != %lg'" Grey "\n\t|\n", file, line, st -> hash_data, hash_data(st));
+        "'hash_data = %lld != %lld'" Grey "\n\t|\n", file, line, st -> hash_data, hash_data(st));
         number_of_errors ++;
     }
 #endif
@@ -345,7 +345,7 @@ int IsDataValid(stack* st){
     return NoPoison;
 }
 
-Data hash_data(stack* st) {
+Ull hash_data(stack* st) {
 
     Data mult    = 0.5;
     Data hash    = 0;
@@ -364,7 +364,7 @@ int is_equal(Data value1, Data value2) {
 }
 
 #ifdef STACK_HASH
-Data hash_stack(stack* st) {
+Ull hash_stack(stack* st) {
 
 
     size_t mult      = 0.5;
@@ -397,8 +397,8 @@ void StackDump (stack* st, int line, const char func[], const char* stack_name)
     fprintf(log_txt, "Stack name: %s\n",                          stack_name);
     fprintf(log_txt, "\t\tElements in stack(st.size):   %d\n",     st->size);
 #ifdef STACK_CANARY
-    fprintf(log_txt, "\t\tStack Canary left            = %lg        \n",     st->canary_left);
-    fprintf(log_txt, "\t\tStack Canary right           = %lg        \n",     st->canary_right);
+    fprintf(log_txt, "\t\tStack Canary left            = %lld        \n",     st->canary_left);
+    fprintf(log_txt, "\t\tStack Canary right           = %lld        \n",     st->canary_right);
 #endif
     fprintf(log_txt, "\t\tStack capacity:               %d\n", st->capacity); 
     fprintf(log_txt, "\t\tStack pointer(data):          %p\n", st->data);
